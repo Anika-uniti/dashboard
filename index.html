@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pat's Performance Snapshot | Uniti AI</title>
+    <title>Pat Cooper Hart Performance Dashboard | Uniti AI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -28,7 +29,6 @@
             padding: 40px;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(135deg, #00124d 0%, #000c32 100%);
             color: white;
@@ -53,13 +53,11 @@
             font-weight: 400;
         }
 
-        /* Uniti Logo - matches website exactly */
         .logo svg {
-            height: 40px;
+            height: 50px;
             width: auto;
         }
 
-        /* Overview Box */
         .overview-box {
             background: white;
             border-radius: 24px;
@@ -79,7 +77,6 @@
             font-weight: 600;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -135,7 +132,11 @@
             font-weight: 600;
         }
 
-        /* Tooltip Styles - Fixed Alignment */
+        .stat-benchmark.green {
+            background: rgba(22, 101, 52, 0.1);
+            color: #166534;
+        }
+
         .tooltip {
             position: absolute;
             bottom: calc(100% + 16px);
@@ -200,7 +201,6 @@
             color: #4ade80;
         }
 
-        /* Two Column Layout */
         .two-col {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -247,40 +247,104 @@
             letter-spacing: 0.5px;
         }
 
-        /* Communication Stats */
-        .comm-grid {
+        .location-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .location-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .location-name {
+            width: 140px;
+            font-weight: 600;
+            color: #00124d;
+            font-size: 0.85rem;
+        }
+
+        .location-bar-bg {
+            flex: 1;
+            height: 20px;
+            background: #eceff9;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 16px;
+        }
+
+        .location-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00124d 0%, #0051ff 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            transition: width 0.6s ease;
+            min-width: 30px;
+        }
+
+        .location-bar span {
+            font-size: 0.7rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .location-value {
+            width: 70px;
+            text-align: right;
+            font-weight: 600;
+            color: #00124d;
+        }
+
+        .channel-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 16px;
         }
 
-        .comm-stat {
+        .channel-stat {
             text-align: center;
-            padding: 20px 12px;
+            padding: 24px 16px;
             background: #f7f7f7;
             border-radius: 16px;
             transition: all 0.2s ease;
-            cursor: pointer;
             position: relative;
         }
 
-        .comm-stat:hover {
+        .channel-stat:hover {
             background: #eceff9;
         }
 
-        .comm-stat:hover .tooltip {
+        .channel-stat:hover .tooltip {
             opacity: 1;
             visibility: visible;
             transform: translateX(-50%) translateY(0);
         }
 
-        .comm-stat-value {
+        .channel-stat-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .channel-stat-icon svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .channel-stat-value {
             font-size: 1.75rem;
             font-weight: 800;
             color: #00124d;
         }
 
-        .comm-stat-label {
+        .channel-stat-label {
             font-size: 0.7rem;
             color: #2b3858;
             margin-top: 6px;
@@ -289,26 +353,90 @@
             font-weight: 500;
         }
 
-        /* Holiday badge */
-        .holiday-badge {
-            display: inline-flex;
+        .channel-stat-sub {
+            font-size: 0.75rem;
+            color: #0051ff;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .response-time-display {
+            display: flex;
             align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 1px solid #fcd34d;
-            padding: 10px 18px;
-            border-radius: 12px;
+            gap: 32px;
+            padding: 16px 0;
+        }
+
+        .response-big {
+            text-align: center;
+        }
+
+        .response-value {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #166534;
+            line-height: 1;
+        }
+
+        .response-unit {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #166534;
+        }
+
+        .response-label {
+            font-size: 0.75rem;
+            color: #2b3858;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            margin-top: 6px;
+        }
+
+        .response-breakdown {
+            flex: 1;
+        }
+
+        .response-bar-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
             font-size: 0.85rem;
-            color: #92400e;
-            margin-top: 20px;
+        }
+
+        .response-bar-label {
+            width: 100px;
+            color: #2b3858;
             font-weight: 500;
         }
 
-        /* Engagement Section */
+        .response-bar-bg {
+            flex: 1;
+            height: 12px;
+            background: #eceff9;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 0 12px;
+        }
+
+        .response-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            border-radius: 6px;
+        }
+
+        .response-bar-value {
+            width: 50px;
+            text-align: right;
+            font-weight: 700;
+            color: #166534;
+        }
+
         .engaged-stat {
             display: flex;
             align-items: center;
-            gap: 24px;
+            justify-content: center;
+            gap: 32px;
             padding: 16px 0;
         }
 
@@ -334,7 +462,7 @@
 
         .engaged-rate {
             background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-            padding: 16px 24px;
+            padding: 20px 28px;
             border-radius: 16px;
             text-align: center;
         }
@@ -353,12 +481,11 @@
             font-weight: 600;
         }
 
-        /* Distribution bars */
         .dist-bars {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-top: 8px;
+            margin-top: 20px;
         }
 
         .dist-item {
@@ -368,7 +495,7 @@
         }
 
         .dist-label {
-            width: 130px;
+            width: 100px;
             color: #2b3858;
             font-weight: 500;
         }
@@ -388,9 +515,9 @@
             transition: width 0.6s ease;
         }
 
-        .dist-bar.light { background: linear-gradient(90deg, #c7d2fe, #a5b4fc); }
-        .dist-bar.medium { background: linear-gradient(90deg, #818cf8, #6366f1); }
-        .dist-bar.dark { background: linear-gradient(90deg, #00124d, #1e3a8a); }
+        .dist-bar.blue { background: linear-gradient(90deg, #00124d, #0051ff); }
+        .dist-bar.purple { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+        .dist-bar.green { background: linear-gradient(90deg, #059669, #10b981); }
 
         .dist-value {
             width: 45px;
@@ -399,59 +526,6 @@
             color: #00124d;
         }
 
-        /* Location Bars */
-        .location-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .location-item {
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-
-        .location-name {
-            width: 110px;
-            font-weight: 600;
-            color: #00124d;
-        }
-
-        .location-bar-bg {
-            flex: 1;
-            height: 20px;
-            background: #eceff9;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 0 16px;
-        }
-
-        .location-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #00124d 0%, #0051ff 100%);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
-            transition: width 0.6s ease;
-        }
-
-        .location-bar span {
-            font-size: 0.7rem;
-            color: white;
-            font-weight: 700;
-        }
-
-        .location-value {
-            width: 85px;
-            text-align: right;
-            font-weight: 600;
-            color: #00124d;
-        }
-
-        /* Three Column Bottom */
         .three-col {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -459,7 +533,6 @@
             margin-bottom: 24px;
         }
 
-        /* Sentiment */
         .sentiment-big {
             text-align: center;
             padding: 20px 0;
@@ -515,7 +588,6 @@
             margin-top: 4px;
         }
 
-        /* Business Value Grid */
         .value-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -589,7 +661,6 @@
             font-weight: 500;
         }
 
-        /* Business Value Note */
         .value-note {
             grid-column: span 2;
             background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
@@ -607,7 +678,6 @@
             font-weight: 700;
         }
 
-        /* Takeaways */
         .takeaway-item {
             display: flex;
             align-items: flex-start;
@@ -653,7 +723,12 @@
             font-weight: 700;
         }
 
-        /* Footer */
+        .chart-container {
+            position: relative;
+            height: 220px;
+            margin-top: 16px;
+        }
+
         .footer {
             margin-top: 32px;
             padding: 24px 32px;
@@ -682,7 +757,6 @@
             color: #00124d;
         }
 
-        /* Responsive */
         @media (max-width: 1200px) {
             .stats-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -707,8 +781,8 @@
             .container {
                 padding: 20px;
             }
-            .comm-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .channel-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -722,6 +796,12 @@
             .value-note {
                 grid-column: span 1;
             }
+            .response-time-display {
+                flex-direction: column;
+            }
+            .engaged-stat {
+                flex-direction: column;
+            }
             .sentiment-details {
                 flex-direction: column;
                 gap: 16px;
@@ -731,376 +811,453 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="header-left">
-                <h1>Pat's Performance Snapshot</h1>
-                <div class="period">Nov 29, 2025 – Jan 28, 2026 (2 months, including Christmas period)</div>
+                <h1>Pat Cooper Hart Performance Dashboard</h1>
+                <div class="period">Dec 1, 2025 – Jan 28, 2026 (2 months)</div>
             </div>
             <div class="logo">
-                <!-- Uniti logo matching website exactly -->
-                <svg viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- U with curved hook -->
-                    <path d="M0 5.5C0 4.67 0.67 4 1.5 4H4.5C5.33 4 6 4.67 6 5.5V20C6 24.42 9.58 28 14 28C18.42 28 22 24.42 22 20V5.5C22 4.67 22.67 4 23.5 4H26.5C27.33 4 28 4.67 28 5.5V20C28 27.73 21.73 34 14 34C6.27 34 0 27.73 0 20V5.5Z" fill="white"/>
-                    <!-- Hook on the U -->
-                    <path d="M28 5.5V8C28 9.1 28.9 10 30 10H32C33.1 10 34 9.1 34 8V5.5C34 4.67 33.33 4 32.5 4H29.5C28.67 4 28 4.67 28 5.5Z" fill="white"/>
-                    <!-- n -->
-                    <path d="M42 14.5C42 13.67 42.67 13 43.5 13H46.5C47.33 13 48 13.67 48 14.5V16C49.5 14.2 52 13 55 13C60.52 13 64 17.48 64 23V32.5C64 33.33 63.33 34 62.5 34H59.5C58.67 34 58 33.33 58 32.5V24C58 20.69 55.87 18.5 52.5 18.5C48.92 18.5 46.5 21.08 46.5 25V32.5C46.5 33.33 45.83 34 45 34H43.5C42.67 34 42 33.33 42 32.5V14.5Z" fill="white"/>
-                    <!-- i -->
-                    <path d="M70 14.5C70 13.67 70.67 13 71.5 13H74.5C75.33 13 76 13.67 76 14.5V32.5C76 33.33 75.33 34 74.5 34H71.5C70.67 34 70 33.33 70 32.5V14.5Z" fill="white"/>
-                    <path d="M70 5.5C70 4.67 70.67 4 71.5 4H74.5C75.33 4 76 4.67 76 5.5V8.5C76 9.33 75.33 10 74.5 10H71.5C70.67 10 70 9.33 70 8.5V5.5Z" fill="white"/>
-                    <!-- t -->
-                    <path d="M82 8.5C82 7.67 82.67 7 83.5 7H86.5C87.33 7 88 7.67 88 8.5V13H92.5C93.33 13 94 13.67 94 14.5V16.5C94 17.33 93.33 18 92.5 18H88V26C88 27.66 89.12 29 91 29H92.5C93.33 29 94 29.67 94 30.5V32.5C94 33.33 93.33 34 92.5 34H90C85.58 34 82 30.64 82 26V8.5Z" fill="white"/>
-                    <!-- i -->
-                    <path d="M100 14.5C100 13.67 100.67 13 101.5 13H104.5C105.33 13 106 13.67 106 14.5V32.5C106 33.33 105.33 34 104.5 34H101.5C100.67 34 100 33.33 100 32.5V14.5Z" fill="white"/>
-                    <path d="M100 5.5C100 4.67 100.67 4 101.5 4H104.5C105.33 4 106 4.67 106 5.5V8.5C106 9.33 105.33 10 104.5 10H101.5C100.67 10 100 9.33 100 8.5V5.5Z" fill="white"/>
+                <svg viewBox="0 0 864 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M537.568 200.367V359.303C537.568 359.303 492.347 363.013 492.347 319.69C491.267 320.767 491.867 200.486 491.867 200.486L537.568 200.367Z" fill="white"/>
+                    <path d="M723.922 200.367V359.303C723.922 359.303 678.701 363.013 678.701 319.69C677.621 320.767 678.221 200.486 678.221 200.486L723.922 200.367Z" fill="white"/>
+                    <path d="M514.673 185.72C527.326 185.72 537.583 175.486 537.583 162.861C537.583 150.237 527.326 140.003 514.673 140.003C502.019 140.003 491.762 150.237 491.762 162.861C491.762 175.486 502.019 185.72 514.673 185.72Z" fill="white"/>
+                    <path d="M700.336 185.72C712.989 185.72 723.246 175.486 723.246 162.861C723.246 150.237 712.989 140.003 700.336 140.003C687.683 140.003 677.425 150.237 677.425 162.861C677.425 175.486 687.683 185.72 700.336 185.72Z" fill="white"/>
+                    <path d="M665.307 304.932V349.811C660.168 353.317 654.375 355.759 648.273 356.992C641.918 358.286 635.447 358.928 628.961 358.907C624.593 358.896 620.229 358.657 615.886 358.189C610.293 357.452 604.863 355.793 599.815 353.282C596.249 351.603 592.801 349.684 589.497 347.537C585.728 344.979 582.161 342.138 578.823 339.04C570.885 331.501 564.452 322.525 559.87 312.592C553.877 299.508 550.38 285.425 549.555 271.064V176.04H594.895C594.895 176.04 594.897 188.367 595.017 204.763H644.316V250C644.316 250 619.486 250.12 595.256 250.24C595.256 255.386 595.255 260.412 595.375 264.96V271.064L595.495 271.183C597.654 297.153 615.648 316.78 637.599 316.78C642.728 316.71 647.79 315.614 652.487 313.559C657.185 311.503 661.421 308.529 664.946 304.813L665.307 304.932Z" fill="white"/>
+                    <path d="M549.812 250.378L549.693 204.901C549.693 219.741 549.812 237.213 549.812 250.378Z" fill="white"/>
+                    <path d="M235.079 357.022C228.633 357.043 222.202 356.402 215.887 355.107C200.809 352.006 186.71 345.301 174.801 335.566C162.892 325.831 153.529 313.358 147.516 299.218C145.029 293.493 143.179 287.514 141.998 281.386C140.701 275.086 140.058 268.67 140.079 262.238C140.079 260.802 140.079 259.246 140.199 257.81V163.145C144.288 163.124 148.363 163.647 152.314 164.701C156.185 165.644 159.901 167.135 163.349 169.129C170.181 172.957 175.983 178.377 180.262 184.926C185.134 192.539 187.715 201.386 187.699 210.418V254.938C187.68 254.692 187.721 254.446 187.819 254.22C187.699 255.416 187.699 256.733 187.699 257.93C187.699 270.499 192.704 282.553 201.612 291.441C210.519 300.329 222.602 305.322 235.199 305.322C247.797 305.322 259.879 300.329 268.787 291.441C277.695 282.553 282.7 270.499 282.7 257.93C282.72 256.891 282.68 255.852 282.58 254.818V175.472H330.08V257.93C330.2 259.366 330.2 260.921 330.2 262.358C330.221 268.789 329.578 275.206 328.281 281.506C325.173 296.55 318.452 310.617 308.695 322.499C298.938 334.38 286.436 343.722 272.264 349.722C266.526 352.203 260.533 354.049 254.392 355.227C248.014 356.353 241.555 356.953 235.079 357.022Z" fill="white"/>
+                    <path d="M478.921 359.997C472.681 360.003 466.502 358.781 460.736 356.401C454.97 354.022 449.731 350.531 445.319 346.129C440.907 341.727 437.409 336.5 435.024 330.748C432.639 324.995 431.415 318.83 431.421 312.605V268.085C431.321 268.799 431.28 269.519 431.3 270.239C431.42 268.564 431.54 266.769 431.54 265.093C431.54 252.545 426.552 240.508 417.67 231.624C408.788 222.74 396.737 217.733 384.16 217.701C375.518 217.684 367.036 220.028 359.635 224.48C352.235 228.932 346.197 235.32 342.177 242.953C342.657 243.073 342.897 174.976 342.897 175.455C364.497 164.996 389.268 163.095 412.217 170.135C435.166 177.175 454.587 192.633 466.566 213.392C474.824 227.834 479.203 244.158 479.28 260.785C479.28 262.221 479.281 263.657 479.161 265.212L478.921 359.997Z" fill="white"/>
                 </svg>
             </div>
         </div>
 
-        <!-- Overview -->
         <div class="overview-box">
-            <p>Pat engaged with <strong>426 leads</strong> who didn't immediately book their trial day, maintaining consistent follow-up during a traditionally quieter period. These leads require additional nurturing beyond the initial 5-10 minute window—Pat ensures none are left behind.</p>
+            <p>Pat Cooper Hart handled <strong>411 leads</strong> across <strong>7 Patch locations</strong> over 2 months, achieving a <strong>12.7% engagement rate</strong>. With <strong>97.3% positive or neutral sentiment</strong> and <strong>99.4% email delivery rate</strong>, this AI copilot ensures every lead receives personalized attention around the clock.</p>
         </div>
 
-        <!-- Key Performance Metrics -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-value">56.2%</div>
-                <div class="stat-label">Email Open Rate</div>
-                <div class="stat-benchmark">2.2x industry avg</div>
+                <div class="stat-value">411</div>
+                <div class="stat-label">Total Leads</div>
+                <div class="stat-benchmark">7 locations</div>
                 <div class="tooltip">
-                    <div class="tooltip-title">Email Open Rate</div>
-                    <div class="tooltip-desc">Percentage of delivered emails that were opened by recipients.</div>
-                    <div class="tooltip-calc">1,050 opened ÷ 1,868 delivered × 100</div>
+                    <div class="tooltip-title">Total Leads Handled</div>
+                    <div class="tooltip-desc">Unique leads that Pat Cooper Hart engaged with across all Patch locations.</div>
                     <div class="tooltip-benchmark">
-                        <strong>Industry avg: 20-25%</strong><br>
-                        Pat's 56.2% is 2.2x higher than the typical industry benchmark for B2B email campaigns.
+                        Leads span from Twickenham to York, ensuring consistent coverage across all markets.
                     </div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">5.1%</div>
-                <div class="stat-label">Response Rate</div>
-                <div class="stat-benchmark">2x industry avg</div>
-                <div class="tooltip">
-                    <div class="tooltip-title">Response Rate</div>
-                    <div class="tooltip-desc">Percentage of sent emails that generated an inbound reply from leads.</div>
-                    <div class="tooltip-calc">95 responses ÷ 1,878 sent × 100</div>
-                    <div class="tooltip-benchmark">
-                        <strong>Industry avg: 1-3%</strong><br>
-                        Pat achieves 2x the typical response rate through personalized, well-timed follow-ups.
-                    </div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">13.6%</div>
+                <div class="stat-value">12.7%</div>
                 <div class="stat-label">Engagement Rate</div>
-                <div class="stat-benchmark">Above average</div>
+                <div class="stat-benchmark green">Above industry avg</div>
                 <div class="tooltip">
-                    <div class="tooltip-title">Engagement Rate</div>
-                    <div class="tooltip-desc">Percentage of leads who actively engaged (replied, clicked, or showed buying signals).</div>
-                    <div class="tooltip-calc">58 engaged ÷ 426 leads × 100</div>
+                    <div class="tooltip-title">Lead Engagement Rate</div>
+                    <div class="tooltip-desc">Percentage of leads who actively engaged via email.</div>
+                    <div class="tooltip-calc">52 engaged ÷ 411 leads × 100</div>
                     <div class="tooltip-benchmark">
-                        <strong>Typical range: 5-10%</strong><br>
-                        These are leads who needed extra nurturing beyond the initial window—13.6% engagement is excellent for this segment.
+                        <strong>Industry avg: 5-10%</strong><br>
+                        Pat's 12.7% shows strong lead nurturing performance.
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">6.4min</div>
+                <div class="stat-label">Median Response</div>
+                <div class="stat-benchmark">Automated</div>
+                <div class="tooltip">
+                    <div class="tooltip-title">Median Response Time</div>
+                    <div class="tooltip-desc">Time between lead reply and Pat's response.</div>
+                    <div class="tooltip-calc">Median of 68 response samples</div>
+                    <div class="tooltip-benchmark">
+                        <strong>39.7% of responses under 5 minutes</strong><br>
+                        Leads receive prompt automated attention.
                     </div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">99.4%</div>
                 <div class="stat-label">Delivery Rate</div>
-                <div class="stat-benchmark">Excellent</div>
+                <div class="stat-benchmark green">Excellent</div>
                 <div class="tooltip">
-                    <div class="tooltip-title">Delivery Rate</div>
+                    <div class="tooltip-title">Email Delivery Rate</div>
                     <div class="tooltip-desc">Percentage of emails successfully delivered to recipients' inboxes.</div>
-                    <div class="tooltip-calc">1,868 delivered ÷ 1,878 sent × 100</div>
+                    <div class="tooltip-calc">1783 delivered ÷ 1794 sent × 100</div>
                     <div class="tooltip-benchmark">
                         <strong>Industry avg: 95-98%</strong><br>
-                        99.4% indicates excellent sender reputation and email list hygiene—virtually no bounces.
+                        99.4% indicates excellent sender reputation and email list hygiene.
                     </div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">1.17%</div>
-                <div class="stat-label">Unsubscribe Rate</div>
-                <div class="stat-benchmark">50% lower</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Spam Complaints</div>
+                <div class="stat-benchmark green">Zero</div>
                 <div class="tooltip">
-                    <div class="tooltip-title">Unsubscribe Rate</div>
-                    <div class="tooltip-desc">Percentage of recipients who opted out of future communications.</div>
-                    <div class="tooltip-calc">5 unsubscribes ÷ 426 leads × 100</div>
+                    <div class="tooltip-title">Spam Complaints</div>
+                    <div class="tooltip-desc">Number of recipients who marked emails as spam.</div>
                     <div class="tooltip-benchmark">
-                        <strong>Industry avg: 2-3%</strong><br>
-                        Pat's low unsubscribe rate shows the messaging is relevant, well-timed, and not perceived as spam.
+                        <strong>Zero spam complaints</strong><br>
+                        This protects sender reputation and ensures high deliverability for future campaigns.
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Communication & Engagement Row -->
         <div class="two-col">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-icon blue">📧</div>
-                    <div class="card-title">Communication Activity</div>
+                    <div class="card-icon green">📍</div>
+                    <div class="card-title">Enquiries by Location</div>
                 </div>
-                <div class="comm-grid">
-                    <div class="comm-stat">
-                        <div class="comm-stat-value">1,878</div>
-                        <div class="comm-stat-label">Emails Sent</div>
+                <div class="location-list">
+                    
+                    <div class="location-item">
+                        <span class="location-name">Twickenham</span>
+                        <div class="location-bar-bg">
+                            <div class="location-bar" style="width: 100%"><span>31%</span></div>
+                        </div>
+                        <span class="location-value">127 leads</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="location-name">Gloucester</span>
+                        <div class="location-bar-bg">
+                            <div class="location-bar" style="width: 69%"><span>21%</span></div>
+                        </div>
+                        <span class="location-value">87 leads</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="location-name">Bournemouth</span>
+                        <div class="location-bar-bg">
+                            <div class="location-bar" style="width: 46%"><span>14%</span></div>
+                        </div>
+                        <span class="location-value">58 leads</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="location-name">Chelmsford</span>
+                        <div class="location-bar-bg">
+                            <div class="location-bar" style="width: 43%"><span>13%</span></div>
+                        </div>
+                        <span class="location-value">55 leads</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="location-name">York</span>
+                        <div class="location-bar-bg">
+                            <div class="location-bar" style="width: 43%"><span>13%</span></div>
+                        </div>
+                        <span class="location-value">54 leads</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="location-name">High Wycombe</span>
+                        <div class="location-bar-bg">
+                            <div class="location-bar" style="width: 23%"><span>7%</span></div>
+                        </div>
+                        <span class="location-value">29 leads</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="location-name">Unknown</span>
+                        <div class="location-bar-bg">
+                            <div class="location-bar" style="width: 1%"><span>0%</span></div>
+                        </div>
+                        <span class="location-value">1 leads</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon blue">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px;">
+                            <path d="M4 6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V14C20 15.1046 19.1046 16 18 16H12L7 20V16H6C4.89543 16 4 15.1046 4 14V6Z" fill="#0051FF"/>
+                        </svg>
+                    </div>
+                    <div class="card-title">Communication Channels</div>
+                </div>
+                <div class="channel-grid">
+                    <div class="channel-stat">
+                        <div class="channel-stat-icon">
+                            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="24" cy="24" r="24" fill="#7C3AED"/>
+                                <path d="M12 17C12 15.8954 12.8954 15 14 15H34C35.1046 15 36 15.8954 36 17V31C36 32.1046 35.1046 33 34 33H14C12.8954 33 12 32.1046 12 31V17Z" fill="white"/>
+                                <path d="M12 17L24 25L36 17" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="channel-stat-value">1,794</div>
+                        <div class="channel-stat-label">Emails Sent</div>
+                        <div class="channel-stat-sub">52 leads engaged</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Total Emails Sent</div>
-                            <div class="tooltip-desc">Total outbound emails sent across all 426 leads during the 2-month period.</div>
+                            <div class="tooltip-title">Email Activity</div>
+                            <div class="tooltip-desc">Total outbound emails sent for lead nurturing.</div>
+                            <div class="tooltip-calc">86 inbound email responses received</div>
                             <div class="tooltip-benchmark">
-                                This includes initial outreach and all follow-up sequences, averaging 4.4 touchpoints per lead.
+                                <strong>4.8% response rate</strong><br>
+                                86 responses from 1,794 emails shows effective messaging.
                             </div>
                         </div>
                     </div>
-                    <div class="comm-stat">
-                        <div class="comm-stat-value">1,050</div>
-                        <div class="comm-stat-label">Emails Opened</div>
+                    <div class="channel-stat">
+                        <div class="channel-stat-icon">
+                            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="24" cy="24" r="24" fill="#8B5CF6"/>
+                                <path d="M12 17C12 15.8954 12.8954 15 14 15H34C35.1046 15 36 15.8954 36 17V31C36 32.1046 35.1046 33 34 33H14C12.8954 33 12 32.1046 12 31V17Z" fill="white"/>
+                                <path d="M12 17L24 25L36 17" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M24 22V30M24 30L20 26M24 30L28 26" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="channel-stat-value">86</div>
+                        <div class="channel-stat-label">Inbound Emails</div>
+                        <div class="channel-stat-sub">From leads</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Emails Opened</div>
-                            <div class="tooltip-desc">Number of emails opened by recipients (tracked via pixel).</div>
-                            <div class="tooltip-calc">56.2% of 1,868 delivered emails</div>
+                            <div class="tooltip-title">Inbound Email Responses</div>
+                            <div class="tooltip-desc">Email replies received from leads indicating interest.</div>
                             <div class="tooltip-benchmark">
-                                Many leads opened multiple emails, showing sustained interest in the nurture sequence.
+                                Each inbound email represents an engaged lead ready for follow-up.
                             </div>
                         </div>
                     </div>
-                    <div class="comm-stat">
-                        <div class="comm-stat-value">95</div>
-                        <div class="comm-stat-label">Responses</div>
+                    <div class="channel-stat">
+                        <div class="channel-stat-icon">
+                            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="24" cy="24" r="24" fill="#10B981"/>
+                                <path d="M16 20L24 26L32 20M16 28L24 34L32 28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="channel-stat-value">1,783</div>
+                        <div class="channel-stat-label">Delivered</div>
+                        <div class="channel-stat-sub">99.4% success</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Inbound Responses</div>
-                            <div class="tooltip-desc">Number of email replies received from leads requiring human follow-up or indicating interest.</div>
+                            <div class="tooltip-title">Emails Delivered</div>
+                            <div class="tooltip-desc">Emails successfully reaching recipients' inboxes.</div>
                             <div class="tooltip-benchmark">
-                                <strong>~6 hours of response handling automated</strong><br>
-                                Pat manages these conversations autonomously, only escalating when needed.
+                                Excellent delivery rate ensures messages reach leads.
                             </div>
                         </div>
                     </div>
-                    <div class="comm-stat">
-                        <div class="comm-stat-value">4.4</div>
-                        <div class="comm-stat-label">Avg Touchpoints</div>
+                    <div class="channel-stat">
+                        <div class="channel-stat-icon">
+                            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="24" cy="24" r="24" fill="#0051FF"/>
+                                <path d="M32 20L28 16M32 20L28 24M32 20H20C17.7909 20 16 21.7909 16 24M16 28L20 32M16 28L20 24M16 28H28C30.2091 28 32 26.2091 32 24" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="channel-stat-value">1,880</div>
+                        <div class="channel-stat-label">Total Interactions</div>
+                        <div class="channel-stat-sub">All channels</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Average Touchpoints per Lead</div>
-                            <div class="tooltip-desc">Average number of emails sent to each lead in the nurture sequence.</div>
-                            <div class="tooltip-calc">1,878 emails ÷ 426 leads</div>
+                            <div class="tooltip-title">Total Interactions</div>
+                            <div class="tooltip-desc">Sum of all email communications.</div>
+                            <div class="tooltip-calc">1,794 emails out + 86 emails in</div>
                             <div class="tooltip-benchmark">
-                                Adaptive approach: some leads receive minimal touch (1), others receive persistent follow-up (7+) based on behavior.
+                                <strong>~4.6 touchpoints per lead</strong><br>
+                                Multi-touch engagement ensures consistent follow-up.
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="holiday-badge">
-                    🎄 Strong performance maintained through Thanksgiving, Christmas & New Year
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon green">⚡</div>
+                    <div class="card-title">Agent Response Time</div>
+                </div>
+                <div class="response-time-display">
+                    <div class="response-big">
+                        <span class="response-value">6.4</span><span class="response-unit">min</span>
+                        <div class="response-label">Median Response</div>
+                    </div>
+                    <div class="response-breakdown">
+                        <div class="response-bar-item">
+                            <span class="response-bar-label">Under 1min</span>
+                            <div class="response-bar-bg">
+                                <div class="response-bar" style="width: 1.5%"></div>
+                            </div>
+                            <span class="response-bar-value">1.5%</span>
+                        </div>
+                        <div class="response-bar-item">
+                            <span class="response-bar-label">Under 5min</span>
+                            <div class="response-bar-bg">
+                                <div class="response-bar" style="width: 39.7%"></div>
+                            </div>
+                            <span class="response-bar-value">39.7%</span>
+                        </div>
+                        <div class="response-bar-item">
+                            <span class="response-bar-label">Under 10min</span>
+                            <div class="response-bar-bg">
+                                <div class="response-bar" style="width: 97.1%"></div>
+                            </div>
+                            <span class="response-bar-value">97.1%</span>
+                        </div>
+                        <div class="response-bar-item">
+                            <span class="response-bar-label">Under 30min</span>
+                            <div class="response-bar-bg">
+                                <div class="response-bar" style="width: 100.0%"></div>
+                            </div>
+                            <span class="response-bar-value">100.0%</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding: 14px 18px; border-radius: 12px; margin-top: 16px; text-align: center;">
+                    <span style="color: #166534; font-weight: 600; font-size: 0.9rem;">📧 Average: 4.9 minutes across 68 responses</span>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon purple">🎯</div>
-                    <div class="card-title">Engagement Results</div>
+                    <div class="card-title">Engagement Breakdown</div>
                 </div>
                 <div class="engaged-stat">
                     <div class="engaged-big">
-                        <div class="engaged-value">58</div>
+                        <div class="engaged-value">52</div>
                         <div class="engaged-label">Leads Engaged</div>
                     </div>
                     <div class="engaged-rate">
-                        <div class="engaged-rate-value">13.6%</div>
+                        <div class="engaged-rate-value">12.7%</div>
                         <div class="engaged-rate-label">Engagement Rate</div>
                     </div>
                 </div>
                 <div class="dist-bars">
                     <div class="dist-item">
-                        <span class="dist-label">Minimal (1 email)</span>
-                        <div class="dist-bar-bg"><div class="dist-bar light" style="width: 69%"></div></div>
-                        <span class="dist-value">71</span>
+                        <span class="dist-label">Email</span>
+                        <div class="dist-bar-bg"><div class="dist-bar purple" style="width: 100.0%"></div></div>
+                        <span class="dist-value">52</span>
                     </div>
                     <div class="dist-item">
-                        <span class="dist-label">Standard (3 emails)</span>
-                        <div class="dist-bar-bg"><div class="dist-bar medium" style="width: 100%"></div></div>
-                        <span class="dist-value">103</span>
+                        <span class="dist-label">Not Interested</span>
+                        <div class="dist-bar-bg"><div class="dist-bar green" style="width: 11.5%"></div></div>
+                        <span class="dist-value">6</span>
                     </div>
                     <div class="dist-item">
-                        <span class="dist-label">Persistent (7 emails)</span>
-                        <div class="dist-bar-bg"><div class="dist-bar dark" style="width: 58%"></div></div>
-                        <span class="dist-value">60</span>
+                        <span class="dist-label">Unsubscribed</span>
+                        <div class="dist-bar-bg"><div class="dist-bar blue" style="width: 9.6%"></div></div>
+                        <span class="dist-value">5</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Location Coverage -->
-        <div class="card" style="margin-bottom: 24px;">
-            <div class="card-header">
-                <div class="card-icon green">🌍</div>
-                <div class="card-title">Multi-Location Coverage (6 Patch Locations)</div>
-            </div>
-            <div class="location-list">
-                <div class="location-item">
-                    <span class="location-name">Twickenham</span>
-                    <div class="location-bar-bg">
-                        <div class="location-bar" style="width: 100%"><span>31%</span></div>
-                    </div>
-                    <span class="location-value">131 leads</span>
-                </div>
-                <div class="location-item">
-                    <span class="location-name">Gloucester</span>
-                    <div class="location-bar-bg">
-                        <div class="location-bar" style="width: 66%"><span>20%</span></div>
-                    </div>
-                    <span class="location-value">87 leads</span>
-                </div>
-                <div class="location-item">
-                    <span class="location-name">Bournemouth</span>
-                    <div class="location-bar-bg">
-                        <div class="location-bar" style="width: 47%"><span>15%</span></div>
-                    </div>
-                    <span class="location-value">62 leads</span>
-                </div>
-                <div class="location-item">
-                    <span class="location-name">York</span>
-                    <div class="location-bar-bg">
-                        <div class="location-bar" style="width: 44%"><span>14%</span></div>
-                    </div>
-                    <span class="location-value">58 leads</span>
-                </div>
-                <div class="location-item">
-                    <span class="location-name">Chelmsford</span>
-                    <div class="location-bar-bg">
-                        <div class="location-bar" style="width: 43%"><span>13%</span></div>
-                    </div>
-                    <span class="location-value">56 leads</span>
-                </div>
-                <div class="location-item">
-                    <span class="location-name">High Wycombe</span>
-                    <div class="location-bar-bg">
-                        <div class="location-bar" style="width: 23%"><span>7%</span></div>
-                    </div>
-                    <span class="location-value">30 leads</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bottom Three Columns -->
-        <div class="three-col">
-            <!-- Sentiment -->
+        <div class="three-col" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon green">💚</div>
                     <div class="card-title">Customer Sentiment</div>
                 </div>
                 <div class="sentiment-big">
-                    <div class="sentiment-value">97.4%</div>
-                    <div class="sentiment-label">Positive or Neutral Interactions</div>
+                    <div class="sentiment-value">97.3%</div>
+                    <div class="sentiment-label">Positive or Neutral</div>
                 </div>
                 <div class="sentiment-details">
                     <div class="sentiment-item">
-                        <div class="sentiment-item-value">5</div>
-                        <div class="sentiment-item-label">Unsubscribes</div>
+                        <div class="sentiment-item-value" style="color: #166534;">37</div>
+                        <div class="sentiment-item-label">Positive</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Unsubscribes</div>
-                            <div class="tooltip-desc">Leads who opted out of future communications.</div>
+                            <div class="tooltip-title">Positive Sentiment</div>
+                            <div class="tooltip-desc">Leads who expressed gratitude, interest, or positive feedback.</div>
                             <div class="tooltip-benchmark">
-                                <strong>1.17% unsubscribe rate</strong><br>
-                                Well below the 2-3% industry average, indicating relevant, respectful messaging.
+                                <strong>9.0% of all conversations</strong><br>
+                                Includes thank you messages, booking confirmations, and expressions of interest.
                             </div>
                         </div>
                     </div>
                     <div class="sentiment-item">
-                        <div class="sentiment-item-value">6</div>
-                        <div class="sentiment-item-label">Not Interested</div>
+                        <div class="sentiment-item-value">363</div>
+                        <div class="sentiment-item-label">Neutral</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Not Interested Responses</div>
-                            <div class="tooltip-desc">Leads who explicitly indicated they're not interested at this time.</div>
+                            <div class="tooltip-title">Neutral Sentiment</div>
+                            <div class="tooltip-desc">Leads with standard inquiries without strong positive or negative signals.</div>
                             <div class="tooltip-benchmark">
-                                <strong>1.4% negative response rate</strong><br>
-                                These leads are marked and excluded from future outreach to maintain brand reputation.
+                                <strong>88.3% of all conversations</strong><br>
+                                Professional inquiries and information requests.
                             </div>
                         </div>
                     </div>
                     <div class="sentiment-item">
-                        <div class="sentiment-item-value">0</div>
-                        <div class="sentiment-item-label">Spam Complaints</div>
+                        <div class="sentiment-item-value" style="color: #dc2626;">11</div>
+                        <div class="sentiment-item-label">Negative</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Spam Complaints</div>
-                            <div class="tooltip-desc">Number of recipients who marked emails as spam.</div>
+                            <div class="tooltip-title">Negative Sentiment</div>
+                            <div class="tooltip-desc">Leads who expressed disinterest or requested to stop communication.</div>
                             <div class="tooltip-benchmark">
-                                <strong>Zero spam complaints</strong><br>
-                                This protects sender reputation and ensures high deliverability for future campaigns.
+                                <strong>Only 2.7% negative</strong><br>
+                                Includes 6 "not interested" and 5 unsubscribes.
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Business Value -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon blue">📊</div>
+                    <div class="card-title">Leads by Region</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="regionChart"></canvas>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon blue">💼</div>
-                    <div class="card-title">Business Value Delivered</div>
+                    <div class="card-title">Business Value</div>
                 </div>
                 <div class="value-grid">
                     <div class="value-item">
-                        <div class="value-item-value">~53 hrs</div>
+                        <div class="value-item-value">~52 hrs</div>
                         <div class="value-item-label">Time Saved</div>
                         <div class="tooltip">
                             <div class="tooltip-title">Time Saved</div>
                             <div class="tooltip-desc">Estimated manual hours automated by Pat during this period.</div>
                             <div class="tooltip-calc">
-                                Emails: 1,878 × 1.5 min = 47 hrs<br>
-                                Responses: 95 × 4 min = 6 hrs
+                                Emails: 1,794 × 1.5 min = 45 hrs<br>
+                                Responses: 86 × 5 min = 7 hrs
                             </div>
                             <div class="tooltip-benchmark">
-                                That's more than <strong>1 full work week</strong> of capacity returned to your team.
+                                That's over <strong>1.3 full work weeks</strong> of capacity returned to your team.
                             </div>
                         </div>
                     </div>
                     <div class="value-item">
-                        <div class="value-item-value">£1,060+</div>
+                        <div class="value-item-value">£1,820+</div>
                         <div class="value-item-label">Cost Savings</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Labor Cost Savings</div>
+                            <div class="tooltip-title">Labour Cost Savings</div>
                             <div class="tooltip-desc">Estimated cost of the manual work Pat automated.</div>
-                            <div class="tooltip-calc">53 hours × £20-25/hour</div>
+                            <div class="tooltip-calc">52 hours × £35/hour</div>
                             <div class="tooltip-benchmark">
-                                <strong>£1,060 - £1,325 saved</strong><br>
-                                This is just for 2 months including the slower holiday period.
+                                <strong>£1,820+ saved</strong><br>
+                                Based on 2 months of 24/7 automated coverage.
                             </div>
                         </div>
                     </div>
                     <div class="value-item">
-                        <div class="value-item-value">58</div>
-                        <div class="value-item-label">Prospects Re-engaged</div>
+                        <div class="value-item-value">52</div>
+                        <div class="value-item-label">Engaged</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Prospects Re-engaged</div>
-                            <div class="tooltip-desc">Leads who were nurtured back into active conversation.</div>
+                            <div class="tooltip-title">Prospects Engaged</div>
+                            <div class="tooltip-desc">Leads who were nurtured into active conversation.</div>
                             <div class="tooltip-benchmark">
-                                These are leads who needed extra time and touchpoints—without Pat, they would have gone cold. Each re-engaged prospect is a potential trial day booking.
+                                Each engaged prospect is a potential workspace booking.
                             </div>
                         </div>
                     </div>
                     <div class="value-item">
-                        <div class="value-item-value">95</div>
-                        <div class="value-item-label">Active Conversations</div>
+                        <div class="value-item-value">24/7</div>
+                        <div class="value-item-label">Availability</div>
                         <div class="tooltip">
-                            <div class="tooltip-title">Active Conversations</div>
-                            <div class="tooltip-desc">Total inbound responses Pat managed during the period.</div>
+                            <div class="tooltip-title">24/7 Availability</div>
+                            <div class="tooltip-desc">Pat responds to leads automatically, any time of day.</div>
                             <div class="tooltip-benchmark">
-                                Pat handles qualification, objections, and scheduling—only escalating complex cases to your team.
+                                No lead waits for business hours.
                             </div>
                         </div>
-                    </div>
-                    <div class="value-note">
-                        <strong>Note:</strong> This value is in addition to revenue generated from deals closed that had interaction with Pat
                     </div>
                 </div>
             </div>
 
-            <!-- Key Takeaways -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon orange">✅</div>
@@ -1108,28 +1265,65 @@
                 </div>
                 <div class="takeaway-item">
                     <div class="takeaway-num">1</div>
-                    <div class="takeaway-text"><strong>High-Quality Engagement:</strong> 56.2% open rate and 5.1% response rate significantly exceed industry benchmarks</div>
+                    <div class="takeaway-text"><strong>High Volume:</strong> 1,794 emails sent across 7 locations</div>
                 </div>
                 <div class="takeaway-item">
                     <div class="takeaway-num">2</div>
-                    <div class="takeaway-text"><strong>Efficient Nurturing:</strong> 4.4 avg touchpoints per lead with 97.4% positive sentiment</div>
+                    <div class="takeaway-text"><strong>Strong Engagement:</strong> 12.7% of leads engaged—above industry avg</div>
                 </div>
                 <div class="takeaway-item">
                     <div class="takeaway-num">3</div>
-                    <div class="takeaway-text"><strong>Scalable Coverage:</strong> 426 leads across 6 locations with consistent quality and zero spam</div>
+                    <div class="takeaway-text"><strong>Great Sentiment:</strong> 97.3% positive or neutral interactions</div>
                 </div>
                 <div class="takeaway-item">
                     <div class="takeaway-num">4</div>
-                    <div class="takeaway-text"><strong>Reliable Performance:</strong> Consistent operation through holidays, weekends, and team availability gaps</div>
+                    <div class="takeaway-text"><strong>Zero Spam:</strong> Perfect sender reputation maintained</div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="footer">
-            <div class="footer-text">Pat effectively recovers trial day bookings from leads who need additional time and touchpoints to convert.</div>
+            <div class="footer-text">Pat Cooper Hart provides automated, personalized responses across 7 Patch locations—24/7.</div>
             <a href="mailto:support@getuniti.com" class="footer-contact">Questions? Contact your Uniti AI team →</a>
         </div>
     </div>
+
+    <script>
+        const regionCtx = document.getElementById('regionChart').getContext('2d');
+        new Chart(regionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['South East', 'South West', 'North', 'Other'],
+                datasets: [{
+                    data: [211, 145, 54, 1],
+                    backgroundColor: [
+                        '#00124d',
+                        '#0051ff',
+                        '#818cf8',
+                        '#c7d2fe'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 12,
+                            usePointStyle: true,
+                            font: {
+                                family: 'Inter',
+                                size: 11
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    </script>
 </body>
 </html>
