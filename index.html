@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboards | Uniti AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #00124d 0%, #000c32 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            margin-bottom: 32px;
+        }
+
+        .logo svg {
+            height: 60px;
+            width: auto;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.15rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Search */
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto 48px;
+        }
+
+        .search-box {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 16px 20px;
+            font-size: 1rem;
+            color: white;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-box button {
+            background: #0051ff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .search-box button:hover {
+            background: #0040cc;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px;
+            color: #00124d;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0051ff, #7c3aed);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #00124d, #0051ff);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .card-status {
+            font-size: 0.7rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-status.active {
+            background: rgba(22, 163, 74, 0.1);
+            color: #16a34a;
+        }
+
+        .card-status.new {
+            background: rgba(0, 81, 255, 0.1);
+            color: #0051ff;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #00124d;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .card-stats {
+            display: flex;
+            gap: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eceff9;
+        }
+
+        .card-stat {
+            text-align: center;
+        }
+
+        .card-stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #00124d;
+        }
+
+        .card-stat-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .card-arrow {
+            position: absolute;
+            right: 24px;
+            bottom: 24px;
+            width: 40px;
+            height: 40px;
+            background: #f7f7f7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover .card-arrow {
+            background: #0051ff;
+            color: white;
+        }
+
+        .card-arrow svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Add Dashboard Card */
+        .add-dashboard {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 280px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .add-dashboard:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .add-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .add-dashboard h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .add-dashboard p {
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 80px;
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+
+        .footer a {
+            color: #0051ff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-stats {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <svg viewBox="0 0 864 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M537.568 200.367V359.303C537.568 359.303 492.347 363.013 492.347 319.69C491.267 320.767 491.867 200.486 491.867 200.486L537.568 200.367Z" fill="white"/>
+                    <path d="M723.922 200.367V359.303C723.922 359.303 678.701 363.013 678.701 319.69C677.621 320.767 678.221 200.486 678.221 200.486L723.922 200.367Z" fill="white"/>
+                    <path d="M514.673 185.72C527.326 185.72 537.583 175.486 537.583 162.861C537.583 150.237 527.326 140.003 514.673 140.003C502.019 140.003 491.762 150.237 491.762 162.861C491.762 175.486 502.019 185.72 514.673 185.72Z" fill="white"/>
+                    <path d="M700.336 185.72C712.989 185.72 723.246 175.486 723.246 162.861C723.246 150.237 712.989 140.003 700.336 140.003C687.683 140.003 677.425 150.237 677.425 162.861C677.425 175.486 687.683 185.72 700.336 185.72Z" fill="white"/>
+                    <path d="M665.307 304.932V349.811C660.168 353.317 654.375 355.759 648.273 356.992C641.918 358.286 635.447 358.928 628.961 358.907C624.593 358.896 620.229 358.657 615.886 358.189C610.293 357.452 604.863 355.793 599.815 353.282C596.249 351.603 592.801 349.684 589.497 347.537C585.728 344.979 582.161 342.138 578.823 339.04C570.885 331.501 564.452 322.525 559.87 312.592C553.877 299.508 550.38 285.425 549.555 271.064V176.04H594.895C594.895 176.04 594.897 188.367 595.017 204.763H644.316V250C644.316 250 619.486 250.12 595.256 250.24C595.256 255.386 595.255 260.412 595.375 264.96V271.064L595.495 271.183C597.654 297.153 615.648 316.78 637.599 316.78C642.728 316.71 647.79 315.614 652.487 313.559C657.185 311.503 661.421 308.529 664.946 304.813L665.307 304.932Z" fill="white"/>
+                    <path d="M549.812 250.378L549.693 204.901C549.693 219.741 549.812 237.213 549.812 250.378Z" fill="white"/>
+                    <path d="M235.079 357.022C228.633 357.043 222.202 356.402 215.887 355.107C200.809 352.006 186.71 345.301 174.801 335.566C162.892 325.831 153.529 313.358 147.516 299.218C145.029 293.493 143.179 287.514 141.998 281.386C140.701 275.086 140.058 268.67 140.079 262.238C140.079 260.802 140.079 259.246 140.199 257.81V163.145C144.288 163.124 148.363 163.647 152.314 164.701C156.185 165.644 159.901 167.135 163.349 169.129C170.181 172.957 175.983 178.377 180.262 184.926C185.134 192.539 187.715 201.386 187.699 210.418V254.938C187.68 254.692 187.721 254.446 187.819 254.22C187.699 255.416 187.699 256.733 187.699 257.93C187.699 270.499 192.704 282.553 201.612 291.441C210.519 300.329 222.602 305.322 235.199 305.322C247.797 305.322 259.879 300.329 268.787 291.441C277.695 282.553 282.7 270.499 282.7 257.93C282.72 256.891 282.68 255.852 282.58 254.818V175.472H330.08V257.93C330.2 259.366 330.2 260.921 330.2 262.358C330.221 268.789 329.578 275.206 328.281 281.506C325.173 296.55 318.452 310.617 308.695 322.499C298.938 334.38 286.436 343.722 272.264 349.722C266.526 352.203 260.533 354.049 254.392 355.227C248.014 356.353 241.555 356.953 235.079 357.022Z" fill="white"/>
+                    <path d="M478.921 359.997C472.681 360.003 466.502 358.781 460.736 356.401C454.97 354.022 449.731 350.531 445.319 346.129C440.907 341.727 437.409 336.5 435.024 330.748C432.639 324.995 431.415 318.83 431.421 312.605V268.085C431.321 268.799 431.28 269.519 431.3 270.239C431.42 268.564 431.54 266.769 431.54 265.093C431.54 252.545 426.552 240.508 417.67 231.624C408.788 222.74 396.737 217.733 384.16 217.701C375.518 217.684 367.036 220.028 359.635 224.48C352.235 228.932 346.197 235.32 342.177 242.953C342.657 243.073 342.897 174.976 342.897 175.455C364.497 164.996 389.268 163.095 412.217 170.135C435.166 177.175 454.587 192.633 466.566 213.392C474.824 227.834 479.203 244.158 479.28 260.785C479.28 262.221 479.281 263.657 479.161 265.212L478.921 359.997Z" fill="white"/>
+                </svg>
+            </div>
+            <h1>Customer Performance Dashboards</h1>
+            <p>Real-time insights into AI agent performance across all your accounts. Track engagement, response times, and ROI.</p>
+        </div>
+
+        <!-- Search -->
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" placeholder="Search dashboards..." id="searchInput" onkeyup="filterDashboards()">
+                <button>Search</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid" id="dashboardGrid">
+            <!-- Pacific Workplaces - Kasey James -->
+            <a href="kasey_james_dashboard.html" class="dashboard-card" data-name="pacific workplaces kasey james">
+                <div class="card-header">
+                    <div class="card-icon">🏢</div>
+                    <span class="card-status active">Active</span>
+                </div>
+                <div class="card-title">Pacific Workplaces</div>
+                <div class="card-subtitle">Kasey James • Nov 30, 2025 – Jan 30, 2026</div>
+                <div class="card-stats">
+                    <div class="card-stat">
+                        <div class="card-stat-value">417</div>
+                        <div class="card-stat-label">Leads</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value">52.0%</div>
+                        <div class="card-stat-label">Engaged</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value">3s</div>
+                        <div class="card-stat-label">Response</div>
+                    </div>
+                </div>
+                <div class="card-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Example: Another Customer -->
+            <a href="#" class="dashboard-card" data-name="the office group pat">
+                <div class="card-header">
+                    <div class="card-icon">🏬</div>
+                    <span class="card-status active">Active</span>
+                </div>
+                <div class="card-title">The Office Group</div>
+                <div class="card-subtitle">Pat • Nov 29, 2025 – Jan 28, 2026</div>
+                <div class="card-stats">
+                    <div class="card-stat">
+                        <div class="card-stat-value">426</div>
+                        <div class="card-stat-label">Leads</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value">13.6%</div>
+                        <div class="card-stat-label">Engaged</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value">56%</div>
+                        <div class="card-stat-label">Open Rate</div>
+                    </div>
+                </div>
+                <div class="card-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Example: Third Customer -->
+            <a href="#" class="dashboard-card" data-name="iwg venture x">
+                <div class="card-header">
+                    <div class="card-icon">🌐</div>
+                    <span class="card-status new">New</span>
+                </div>
+                <div class="card-title">IWG / Venture X</div>
+                <div class="card-subtitle">Alex • Dec 1, 2025 – Jan 31, 2026</div>
+                <div class="card-stats">
+                    <div class="card-stat">
+                        <div class="card-stat-value">892</div>
+                        <div class="card-stat-label">Leads</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value">48.2%</div>
+                        <div class="card-stat-label">Engaged</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value">5s</div>
+                        <div class="card-stat-label">Response</div>
+                    </div>
+                </div>
+                <div class="card-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Add New Dashboard -->
+            <a href="mailto:support@getuniti.com?subject=New Dashboard Request" class="add-dashboard">
+                <div class="add-icon">+</div>
+                <h3>Add New Dashboard</h3>
+                <p>Request a new customer dashboard</p>
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Powered by <a href="https://getuniti.com" target="_blank">Uniti AI</a> • Questions? <a href="mailto:support@getuniti.com">Contact Support</a></p>
+        </div>
+    </div>
+
+    <script>
+        function filterDashboards() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.dashboard-card');
+
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name') || '';
+                const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+                const subtitle = card.querySelector('.card-subtitle')?.textContent.toLowerCase() || '';
+
+                if (name.includes(searchInput) || title.includes(searchInput) || subtitle.includes(searchInput)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
